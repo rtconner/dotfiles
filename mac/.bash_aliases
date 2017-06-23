@@ -1,10 +1,6 @@
 alias task-manager='open -a "Activity Monitor"'
 alias sublime='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl'
 
-alias mysql.start='mysql.server start'
-alias mysql.stop='mysql.server stop'
-alias mysql.open='mysql -uroot'
-
 alias count-files='find . ! -name . -prune -print | grep -c /'
 alias count-files-recursive='find . -type f | wc -l'
 
@@ -15,10 +11,6 @@ alias apache.restart='apache.stop && apache.start'
 alias cass.start='launchctl load ~/Library/LaunchAgents/homebrew.mxcl.cassandra.plist'
 alias cass.stop='launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.cassandra.plist'
 alias cass.restart='cass.stop && cass.start'
-
-alias tomcat.start='/Library/Tomcat/bin/startup.sh'
-alias tomcat.stop='/Library/Tomcat/bin/shutdown.sh'
-alias tomcat.restart='tomcat.stop && tomcat.start'
 
 #alias nginx.start='sudo launchctl load /Library/LaunchDaemons/homebrew.mxcl.nginx.plist'
 #alias nginx.stop='sudo launchctl unload /Library/LaunchDaemons/homebrew.mxcl.nginx.plist'
@@ -34,6 +26,16 @@ alias tomcat.restart='tomcat.stop && tomcat.start'
 #alias nginx.logs.phpmyadmin.error='tail -250f /usr/local/etc/nginx/logs/phpmyadmin.error.log'
 #alias nginx.logs.phpmyadmin.access='tail -250f /usr/local/etc/nginx/logs/phpmyadmin.access.log'
 
-alias dragon.up="pushd /Volumes/sfteam/vagrant-box >/dev/null 2>&1; vagrant up; popd >/dev/null 2>&1"
-alias dragon.ssh="vagrant ssh 9d16e10"
-alias dragon.server='ssh 172.16.40.5'
+function mysql.start() {
+  RUNNING=`docker inspect -f {{.State.Running}} mysql70`
+  if [ "$RUNNING" == "true" ]
+  then
+    echo "mysql is already running"
+  elif [ "$RUNNING" == "false" ]; then
+    docker start mysql70
+  else
+    docker run -d -p 3306:3306 --name mysql70 -e MYSQL_ROOT_PASSWORD=a mysql/mysql-server:8.0 --bind-address=::
+  fi
+}
+alias mysql.stop='docker stop mysql70'
+alias mysql.bash='docker exec -it mysql70 bash'
